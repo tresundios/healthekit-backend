@@ -1,0 +1,18 @@
+# UAT — app box only; Postgres/Redis on a separate DB EC2 (mirrors prod shape)
+services:
+  api:
+    image: navistresundios/healthekit-backend:${BACKEND_TAG:-uat-latest}
+    env_file: [/opt/healthekit/env/.env.uat]
+    restart: unless-stopped
+    expose: ["8000"]
+  web:
+    image: navistresundios/healthekit-frontend:${FRONTEND_TAG:-uat-latest}
+    restart: unless-stopped
+    expose: ["80"]
+  nginx:
+    image: nginx:1.27-alpine
+    ports: ["80:80", "443:443"]
+    volumes:
+      - /opt/healthekit/nginx/uat.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    restart: unless-stopped
