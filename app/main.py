@@ -56,7 +56,7 @@ async def navisz():
 
 @app.get("/bearlyz", tags=["health"])
 async def bearlyz():
-    return {"status": "ok bearly", "env": settings.ENV}
+    return {"status": "ok bearlys new frontend", "env": settings.ENV}
 
 app.include_router(api_router, prefix="/api/v1")
 # ABDM gateway callbacks (bridge URL points here) — must stay at /api/v3/*
