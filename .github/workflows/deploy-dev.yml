@@ -52,9 +52,11 @@ jobs:
           key: ${{ secrets.DEV_SSH_KEY }}
           script: |
             cd /opt/healthekit
-            export BACKEND_TAG=${{ steps.tag.outputs.tag }}
+            sed -i '/^BACKEND_TAG=/d' .env
+            echo "BACKEND_TAG=${{ steps.tag.outputs.tag }}" >> .env
             docker compose -f docker-compose.dev.yml pull api
             docker compose -f docker-compose.dev.yml up -d api
+            docker compose -f docker-compose.dev.yml exec -T api alembic upgrade head
             docker image prune -f
       - name: smoke
         run: |
