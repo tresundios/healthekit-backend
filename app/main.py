@@ -49,7 +49,11 @@ async def readyz():
     except Exception:
         raise HTTPException(status_code=503, detail="dependencies not ready")
     return {"status": "ready"}
-
+    
+@app.get("/navisz", tags=["health"])
+async def navisz():
+    return {"status": "ok", "env": settings.ENV}
+    
 app.include_router(api_router, prefix="/api/v1")
 # ABDM gateway callbacks (bridge URL points here) — must stay at /api/v3/*
 app.include_router(callback_router, prefix="/api/v3")
