@@ -9,6 +9,7 @@ async def _headers(extra: dict | None = None) -> dict:
     h = {
         "REQUEST-ID": str(uuid.uuid4()),
         "TIMESTAMP": _iso_now(),
+        "X-CM-ID": settings.ABDM_X_CM_ID,
         "Authorization": f"Bearer {await get_gateway_token()}",
         "Content-Type": "application/json",
     }
