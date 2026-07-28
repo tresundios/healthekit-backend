@@ -41,7 +41,7 @@ async def healthz():
 @app.get("/readyz", tags=["health"])
 async def readyz():
     # TODO: check DB + Redis connectivity
-    return {"status": "ready"}
+    return {"status": "ready navis new docker hub"}
 
 
 app.include_router(api_router, prefix="/api/v1")
