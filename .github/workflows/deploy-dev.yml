@@ -2,9 +2,20 @@ name: dev — test, build, push, deploy
 on:
   push:
     branches: [develop]
-
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [dev, qa, uat, prod]
+        default: dev
+      image_tag:
+        description: "Existing tag to redeploy (leave empty to build fresh)"
+        type: string
+        required: false
 env:
   IMAGE: navistresundios/healthekit-backend
+  DEPLOY_ENV: ${{ inputs.environment || 'dev' }}
 
 jobs:
   test:
@@ -46,4 +57,10 @@ jobs:
             docker compose -f docker-compose.dev.yml up -d api
             docker image prune -f
       - name: smoke
-        run: sleep 10 && curl -sf https://api.dev.healthekit.in/healthz
+        run: |
+          for i in {1..6}; do
+            curl -sf https://api.dev.healthekit.in/healthz && exit 0
+            sleep 5
+          done
+          echo "smoke test failed after 30s"
+          exit 1
