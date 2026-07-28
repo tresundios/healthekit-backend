@@ -37,12 +37,18 @@ app.add_middleware(
 async def healthz():
     return {"status": "ok", "env": settings.ENV}
 
-
 @app.get("/readyz", tags=["health"])
 async def readyz():
-    # TODO: check DB + Redis connectivity
-    return {"status": "ready navis new docker hub"}
-
+    from sqlalchemy import text
+    from app.db.session import engine
+    from app.core.redis import get_redis
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        await get_redis().ping()
+    except Exception:
+        raise HTTPException(status_code=503, detail="dependencies not ready")
+    return {"status": "ready"}
 
 app.include_router(api_router, prefix="/api/v1")
 # ABDM gateway callbacks (bridge URL points here) — must stay at /api/v3/*
