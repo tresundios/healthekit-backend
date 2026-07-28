@@ -4,11 +4,10 @@ ABHA V3 requires sensitive fields (Aadhaar number, OTP) encrypted with the
 public key from GET {ABHA_BASE}/profile/public/certificate.
 """
 import base64
-import httpx
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
-from app.core.config import settings
 from app.core.redis import get_redis
+from app.services import abha_client
 
 CERT_KEY = "abdm:abha:public_key_pem"
 
@@ -18,10 +17,8 @@ async def _public_key_pem() -> str:
     pem = await r.get(CERT_KEY)
     if pem:
         return pem
-    async with httpx.AsyncClient(timeout=15) as client:
-        resp = await client.get(f"{settings.ABHA_BASE}/profile/public/certificate")
-        resp.raise_for_status()
-        pem = resp.json()["publicKey"]
+    data = await abha_client.get("/profile/public/certificate")
+    pem = data["publicKey"]
     if "BEGIN PUBLIC KEY" not in pem:
         pem = f"-----BEGIN PUBLIC KEY-----\n{pem}\n-----END PUBLIC KEY-----"
     await r.set(CERT_KEY, pem, ex=6 * 3600)
